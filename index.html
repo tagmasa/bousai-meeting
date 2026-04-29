@@ -442,10 +442,10 @@
 
       // 初期表示は Cesium 3D タブなので、対応する UI を表示する
       // （初回ロード時に showMap() が呼ばれていないための補完）
-      document.getElementById('capture-btn').style.display = 'block';
-      document.getElementById('cesium-ui').style.display = 'flex';
-      document.getElementById('tsunami-ui').style.display = 'block';
-      document.getElementById('nigechizu-ui').style.display = 'none';
+      setUIVisibility('capture-btn', true, 'block');
+      setUIVisibility('cesium-ui', true, 'flex');
+      setUIVisibility('tsunami-ui', true, 'block');
+      setUIVisibility('nigechizu-ui', false, 'block');
     }
 
     function showMap(event, mapId) {
@@ -458,10 +458,12 @@
       const isCesium = (targetId === 'cesiumContainer');
       const isReal = (mapId === 'realMap');
       const isNigeChizu = (mapId === 'nige-chizu');
-      document.getElementById('capture-btn').style.display = (isCesium || isReal) ? 'block' : 'none';
-      document.getElementById('cesium-ui').style.display = (isCesium || isReal) ? 'flex' : 'none';
-      document.getElementById('tsunami-ui').style.display = (isCesium && !isNigeChizu) ? 'block' : 'none';
-      document.getElementById('nigechizu-ui').style.display = isNigeChizu ? 'block' : 'none';
+
+      // UIパネルの表示制御（!important付与で確実に）
+      setUIVisibility('capture-btn', (isCesium || isReal), 'block');
+      setUIVisibility('cesium-ui', (isCesium || isReal), 'flex');
+      setUIVisibility('tsunami-ui', (isCesium && !isNigeChizu), 'block');
+      setUIVisibility('nigechizu-ui', isNigeChizu, 'block');
 
       // トークン未設定時の警告表示
       const warn = document.getElementById('cesium-needed-warning');
@@ -472,6 +474,17 @@
       }
 
       toggleNigeChizuMode(isNigeChizu);
+    }
+
+    // UIの表示・非表示を確実にコントロールするヘルパー関数
+    function setUIVisibility(elementId, isVisible, displayValue) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      if (isVisible) {
+        el.style.setProperty('display', displayValue, 'important');
+      } else {
+        el.style.setProperty('display', 'none', 'important');
+      }
     }
 
     function initAllMaps() {
@@ -640,8 +653,9 @@
       if (!v) return;
 
       try {
-        // カメラの現在の経緯度を取得（位置はそのまま、高さだけ変える）
+        // 現在のカメラ位置・向きを記憶
         const cameraCarto = Cesium.Cartographic.fromCartesian(v.camera.position);
+        const currentHeading = v.camera.heading;
 
         // カメラ直下の地面の高さを取得
         let groundHeight = 0;
@@ -658,7 +672,6 @@
           }
         }
 
-        // sampleHeight 不対応または失敗時は地形のみで取得
         if (!groundHeight && v.terrainProvider) {
           try {
             const terrainSamples = await Cesium.sampleTerrainMostDetailed(
@@ -673,21 +686,23 @@
           }
         }
 
-        // 現在の経緯度のまま、地面+2m の高さへ移動
-        // 向き（heading）は維持、pitch は水平を見る
-        v.camera.flyTo({
+        // ★flyTo ではなく setView で瞬時に位置・向きを変える
+        // これにより「見ている方向に進んでしまう」問題を回避
+        v.camera.setView({
           destination: Cesium.Cartesian3.fromRadians(
             cameraCarto.longitude,
             cameraCarto.latitude,
             groundHeight + 2.0
           ),
           orientation: {
-            heading: v.camera.heading,
-            pitch: 0.0,        // 水平を見る
+            heading: currentHeading,    // 元の向きを維持
+            pitch: 0.0,                 // 水平を見る
             roll: 0.0
-          },
-          duration: 1.5
+          }
         });
+
+        // 再描画を促す
+        v.scene.requestRender();
 
       } catch (e) {
         console.error('住民目線への移動でエラー:', e);
@@ -704,10 +719,9 @@
       if (!v) return;
 
       try {
-        // カメラの現在の経緯度を取得（場所は維持）
         const cameraCarto = Cesium.Cartographic.fromCartesian(v.camera.position);
+        const currentHeading = v.camera.heading;
 
-        // カメラ直下の地面の高さを取得
         let groundHeight = 0;
         const samplePos = new Cesium.Cartographic(cameraCarto.longitude, cameraCarto.latitude);
 
@@ -718,7 +732,6 @@
               groundHeight = sampled[0].height;
             }
           } catch (innerE) {
-            // 失敗時は地形のみで代用
             if (v.terrainProvider) {
               try {
                 const terrainSamples = await Cesium.sampleTerrainMostDetailed(
@@ -733,21 +746,21 @@
           }
         }
 
-        // 現在の経緯度のまま、「地面 + newHeight」の高さへ移動
-        // 向き（heading）と俯瞰角度（pitch）はそのまま維持
-        v.camera.flyTo({
+        // ★setView で瞬時に高度変更（場所と向きは固定）
+        v.camera.setView({
           destination: Cesium.Cartesian3.fromRadians(
             cameraCarto.longitude,
             cameraCarto.latitude,
             groundHeight + newHeight
           ),
           orientation: {
-            heading: v.camera.heading,
+            heading: currentHeading,
             pitch: Cesium.Math.toRadians(-30),
             roll: 0
-          },
-          duration: 1.5
+          }
         });
+
+        v.scene.requestRender();
 
       } catch (e) {
         console.error('俯瞰目線への移動でエラー:', e);
