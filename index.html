@@ -439,6 +439,13 @@
 
       document.getElementById('config-screen').style.display = 'none';
       initAllMaps();
+
+      // 初期表示は Cesium 3D タブなので、対応する UI を表示する
+      // （初回ロード時に showMap() が呼ばれていないための補完）
+      document.getElementById('capture-btn').style.display = 'block';
+      document.getElementById('cesium-ui').style.display = 'flex';
+      document.getElementById('tsunami-ui').style.display = 'block';
+      document.getElementById('nigechizu-ui').style.display = 'none';
     }
 
     function showMap(event, mapId) {
@@ -632,57 +639,51 @@
       const v = getCurrentViewer();
       if (!v) return;
 
-      // terrainProvider が未準備の場合は待つ
-      if (!v.terrainProvider || !v.terrainProvider.ready) {
-        // ready プロパティがない新しい Cesium バージョン用フォールバック
-        if (typeof v.terrainProvider === 'undefined') {
-          alert('地形データがまだ読み込まれていません。少し待ってから再度お試しください。\n\nファイルを file:// で開いている場合は、ローカルHTTPサーバー経由で開いてください。');
-          return;
-        }
-      }
-
       try {
-        // 画面中央の地面位置をピッキング（地形+建物すべて含む最上面）
-        const canvas = v.scene.canvas;
-        const centerWindowPos = new Cesium.Cartesian2(
-          canvas.clientWidth / 2,
-          canvas.clientHeight / 2
-        );
+        // カメラの現在の経緯度を取得（位置はそのまま、高さだけ変える）
+        const cameraCarto = Cesium.Cartographic.fromCartesian(v.camera.position);
 
-        const ray = v.camera.getPickRay(centerWindowPos);
-        const groundPos = v.scene.globe.pick(ray, v.scene);
+        // カメラ直下の地面の高さを取得
+        let groundHeight = 0;
+        const samplePos = new Cesium.Cartographic(cameraCarto.longitude, cameraCarto.latitude);
 
-        if (!groundPos) {
-          alert('画面の中央に地面が見えていません。地図を動かしてから再度お試しください。');
-          return;
-        }
-
-        const groundCarto = Cesium.Cartographic.fromCartesian(groundPos);
-        let groundHeight = groundCarto.height;
-
-        // sampleHeightMostDetailed で建物含む最上面の高さを取得
         if (v.scene.sampleHeightSupported) {
           try {
-            const sampledHeight = await v.scene.sampleHeightMostDetailed([groundCarto]);
-            if (sampledHeight && sampledHeight[0] && typeof sampledHeight[0].height === 'number') {
-              groundHeight = sampledHeight[0].height;
+            const sampled = await v.scene.sampleHeightMostDetailed([samplePos]);
+            if (sampled && sampled[0] && typeof sampled[0].height === 'number') {
+              groundHeight = sampled[0].height;
             }
           } catch (innerE) {
-            console.warn('sampleHeightMostDetailed失敗、地形高さで代用:', innerE);
-            // 既に取得済の groundCarto.height を使う
+            console.warn('sampleHeightMostDetailed失敗、sampleTerrainで代用:', innerE);
           }
         }
 
-        // 注視点の地面から2m上にカメラを配置
+        // sampleHeight 不対応または失敗時は地形のみで取得
+        if (!groundHeight && v.terrainProvider) {
+          try {
+            const terrainSamples = await Cesium.sampleTerrainMostDetailed(
+              v.terrainProvider,
+              [samplePos]
+            );
+            if (terrainSamples && terrainSamples[0] && typeof terrainSamples[0].height === 'number') {
+              groundHeight = terrainSamples[0].height;
+            }
+          } catch (terrainE) {
+            console.warn('地形高さの取得失敗:', terrainE);
+          }
+        }
+
+        // 現在の経緯度のまま、地面+2m の高さへ移動
+        // 向き（heading）は維持、pitch は水平を見る
         v.camera.flyTo({
           destination: Cesium.Cartesian3.fromRadians(
-            groundCarto.longitude,
-            groundCarto.latitude,
+            cameraCarto.longitude,
+            cameraCarto.latitude,
             groundHeight + 2.0
           ),
           orientation: {
             heading: v.camera.heading,
-            pitch: 0.0,
+            pitch: 0.0,        // 水平を見る
             roll: 0.0
           },
           duration: 1.5
@@ -698,14 +699,62 @@
       }
     }
 
-    function changeHeight(newHeight) {
-      const v = getCurrentViewer(); if (!v) return;
-      const pos = Cesium.Cartographic.fromCartesian(v.camera.position);
-      v.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(Cesium.Math.toDegrees(pos.longitude), Cesium.Math.toDegrees(pos.latitude), newHeight),
-        orientation: { heading: v.camera.heading, pitch: Cesium.Math.toRadians(-30), roll: 0 }
-      });
+    async function changeHeight(newHeight) {
+      const v = getCurrentViewer();
+      if (!v) return;
+
+      try {
+        // カメラの現在の経緯度を取得（場所は維持）
+        const cameraCarto = Cesium.Cartographic.fromCartesian(v.camera.position);
+
+        // カメラ直下の地面の高さを取得
+        let groundHeight = 0;
+        const samplePos = new Cesium.Cartographic(cameraCarto.longitude, cameraCarto.latitude);
+
+        if (v.scene.sampleHeightSupported) {
+          try {
+            const sampled = await v.scene.sampleHeightMostDetailed([samplePos]);
+            if (sampled && sampled[0] && typeof sampled[0].height === 'number') {
+              groundHeight = sampled[0].height;
+            }
+          } catch (innerE) {
+            // 失敗時は地形のみで代用
+            if (v.terrainProvider) {
+              try {
+                const terrainSamples = await Cesium.sampleTerrainMostDetailed(
+                  v.terrainProvider,
+                  [samplePos]
+                );
+                if (terrainSamples && terrainSamples[0]) {
+                  groundHeight = terrainSamples[0].height || 0;
+                }
+              } catch (e2) { /* 0のまま */ }
+            }
+          }
+        }
+
+        // 現在の経緯度のまま、「地面 + newHeight」の高さへ移動
+        // 向き（heading）と俯瞰角度（pitch）はそのまま維持
+        v.camera.flyTo({
+          destination: Cesium.Cartesian3.fromRadians(
+            cameraCarto.longitude,
+            cameraCarto.latitude,
+            groundHeight + newHeight
+          ),
+          orientation: {
+            heading: v.camera.heading,
+            pitch: Cesium.Math.toRadians(-30),
+            roll: 0
+          },
+          duration: 1.5
+        });
+
+      } catch (e) {
+        console.error('俯瞰目線への移動でエラー:', e);
+        alert('俯瞰目線への移動に失敗しました。\n\n詳細: ' + e.message);
+      }
     }
+
     function captureMap() {
       const v = getCurrentViewer(); if (!v) return;
       const link = document.createElement("a");
