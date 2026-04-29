@@ -472,7 +472,7 @@
       const offset = 0.01;
       document.getElementById('iframe-osm').src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-offset},${lat-offset},${lng+offset},${lat+offset}&layer=mapnik&marker=${lat},${lng}`;
       document.getElementById('link-yahoo').href = `https://crisis.yahoo.co.jp/map/?lat=${lat}&lon=${lng}&z=${zoom}`;
-      document.getElementById('link-aed').href = `https://aedm.jp/search/?la=${lat}&lo=${lng}&z=${zoom}`;
+      document.getElementById('link-aed').href = `https://aedm.jp/`;
       document.getElementById('link-hazard').href = `https://disaportal.gsi.go.jp/maps/?ll=${lat},${lng}&z=${zoom}&base=pale`;
       document.getElementById('iframe-risk').src = `https://maps.gsi.go.jp/#${zoom}/${lat}/${lng}/&base=std&ls=std%7Cexperimental_landformclassification1&disp=11&lcd=experimental_landformclassification1&vs=c1j0h0k0l0u0t0z0r0s0m0f1`;
       document.getElementById('iframe-photo').src = `https://maps.gsi.go.jp/#${zoom}/${lat}/${lng}/&base=std&ls=std%7Cort_riku10&blend=0&disp=11&lcd=ort_riku10&vs=c1j0h0k0l0u0t0z0r0s0m0f2&d=m`;
