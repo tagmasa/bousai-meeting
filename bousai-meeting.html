@@ -859,10 +859,59 @@
         }
       },
 
-      // 途中終了
+      // 途中終了（カスタム確認ダイアログ版）
       confirmReturnToTop: function () {
-        const ok = confirm("訓練を途中終了してトップへ戻りますか？\n（進行状況はリセットされます）");
-        if (ok) this.returnToTop();
+        // すでに確認UIが表示されていれば何もしない
+        if (document.getElementById('custom-confirm-dialog')) return;
+
+        // オーバーレイ作成
+        const overlay = document.createElement('div');
+        overlay.id = 'custom-confirm-dialog';
+        overlay.style.cssText = `
+          position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.6); z-index: 99999;
+          display: flex; justify-content: center; align-items: center;
+        `;
+
+        // ダイアログ本体
+        const box = document.createElement('div');
+        box.style.cssText = `
+          background: white; padding: 30px; border-radius: 12px;
+          max-width: 400px; width: 90%; box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+          text-align: center;
+        `;
+        box.innerHTML = `
+          <div style="font-size: 1.1em; margin-bottom: 20px; line-height: 1.6;">
+            訓練を途中終了してトップへ戻りますか？<br>
+            <span style="font-size:0.85em; color:#666;">（進行状況はリセットされます）</span>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="custom-confirm-cancel" style="
+              padding: 12px 24px; background: #90a4ae; color: white;
+              border: none; border-radius: 6px; cursor: pointer; font-size: 1em;
+            ">キャンセル</button>
+            <button id="custom-confirm-ok" style="
+              padding: 12px 24px; background: #d32f2f; color: white;
+              border: none; border-radius: 6px; cursor: pointer; font-size: 1em;
+            ">トップへ戻る</button>
+          </div>
+        `;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        // ボタン処理
+        const self = this;
+        document.getElementById('custom-confirm-ok').onclick = function () {
+          overlay.remove();
+          self.returnToTop();
+        };
+        document.getElementById('custom-confirm-cancel').onclick = function () {
+          overlay.remove();
+        };
+        // オーバーレイ外側クリックでキャンセル
+        overlay.onclick = function (e) {
+          if (e.target === overlay) overlay.remove();
+        };
       },
 
       // ゲーム開始
