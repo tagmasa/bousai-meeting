@@ -10,8 +10,28 @@
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta name="robots" content="index, follow">
 
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js" crossorigin="anonymous"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet" crossorigin="anonymous">
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cesium.com https://unpkg.com;
+    style-src 'self' 'unsafe-inline' https://cesium.com https://unpkg.com;
+    img-src 'self' data: blob: https: http://*.tile.openstreetmap.org;
+    connect-src 'self' https: wss:;
+    worker-src 'self' blob:;
+    child-src 'self' blob:;
+    frame-src 'self' https://www.openstreetmap.org https://maps.gsi.go.jp;
+    font-src 'self' data: https:;
+  ">
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.114.0/Cesium.js"
+    integrity="sha384-s/4fNXRrqVEwXXdh41s7e/ZDYngErBeaPOPLNgJQ4/Cms8theyOJn4D/Dmmhxaft"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/cesium/1.114.0/Widgets/widgets.min.css"
+    integrity="sha384-SYCEEjqqSowOZO7XvymYepl2gVOl7WTvhpd/mKgV/sMw9SbI4/kBD3D4jj2MBvZY"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
   <link rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -77,6 +97,12 @@
     z-index: 9999;
     justify-content: space-around;
     align-items: center;
+  }
+
+  #mobile-nav .nav-item {
+    background: transparent;
+    border: none;
+    font-family: inherit;
   }
 
   .nav-item {
@@ -182,7 +208,7 @@
 
   .map-instruction {
     font-size: 11px;
-    color: #888;
+    color: #bbb;  /* 暗い背景に対するコントラスト改善 */
     text-align: center;
     margin-bottom: 8px;
   }
@@ -531,8 +557,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(34, 34, 34, 0.92);
-    color: #aaa;
+    background: rgba(34, 34, 34, 0.95);
+    color: #d0d0d0;  /* WCAG AA準拠のコントラスト */
     font-size: 10px;
     padding: 4px 8px;
     text-align: center;
@@ -695,6 +721,20 @@
       display: inline;
     }
   }
+
+  /* =====================================================
+     【14】フォーカスインジケータ（キーボード操作対応）
+     ===================================================== */
+  button:focus-visible,
+  input:focus-visible,
+  a:focus-visible,
+  .nav-item:focus-visible,
+  .menu-card:focus-visible,
+  .tab-button:focus-visible {
+    outline: 3px solid #ffc107;
+    outline-offset: 2px;
+  }
+
 </style>
 
 </head>
@@ -749,8 +789,16 @@
       <!-- Cesium ion トークン（利用者各自取得方式） -->
       <h3 style="color: #66b2ff; margin-top: 20px; margin-bottom: 10px; font-size: 14px;">🌐 Cesium ion アクセストークン（任意）</h3>
       <div class="config-row">
-        <label>Cesium ion アクセストークン</label>
-        <input type="text" id="input-token" placeholder="ご自身で取得したトークンを貼り付けてください" value="">
+        <label for="input-token">Cesium ion アクセストークン</label>
+        <input type="text" id="input-token" placeholder="ご自身で取得したトークンを貼り付けてください" value="" autocomplete="off">
+
+        <div style="margin-top:8px;">
+          <label style="display:flex; align-items:center; font-weight:normal; font-size:12px; color:#ccc; cursor:pointer;">
+            <input type="checkbox" id="input-token-remember" style="width:auto; margin-right:8px;">
+            このブラウザに記憶する（自分専用PCの場合のみ推奨）
+          </label>
+        </div>
+
         <a href="https://ion.cesium.com/tokens" target="_blank" rel="noopener noreferrer" class="ref-link">
           🔍 Cesium ion 公式サイトでトークンを取得（無料登録）
         </a>
@@ -758,7 +806,8 @@
           ⚠ 3D地図機能（Cesium 3D / Cesium(Google)）を利用する場合のみ必要です。<br>
           ・<a href="https://ion.cesium.com/signup" target="_blank" rel="noopener noreferrer" style="color:#9cf;">Cesium ion</a> で<strong>ご自身のアカウント</strong>を作成し、無料のアクセストークンを取得してください。<br>
           ・空欄のままでも、3D以外の地図（OSM・地理院地図・各種外部マップ）はご利用いただけます。<br>
-          ・トークンはこのブラウザ内でのみ使用され、外部に送信されません。
+          ・トークンはこのブラウザ内でのみ使用され、外部に送信されません（記憶を選択した場合のみ、お使いの端末のブラウザストレージに保存されます）。<br>
+          ・<strong>共用PCではチェックを外してください。</strong>
         </div>
       </div>
 
@@ -830,21 +879,21 @@
       </div>
 
       <div class="map-controls mobile-toolbar" id="cesium-ui">
-        <button class="control-btn" style="background: #28a745;" onclick="resetCamera()">
+        <button class="control-btn" style="background: #28a745;" onclick="resetCamera()" aria-label="カメラを初期位置に戻す" type="button">
           <span class="full-label">初期位置に戻る</span>
-          <span class="short-label">🏠 初期</span>
+          <span class="short-label" aria-hidden="true">🏠 初期</span>
         </button>
-        <button class="control-btn" onclick="goToGround()">
+        <button class="control-btn" onclick="goToGround()" aria-label="住民目線：地上2メートルの高さに移動" type="button">
           <span class="full-label">住民目線 (地上2m)</span>
-          <span class="short-label">👤 地上</span>
+          <span class="short-label" aria-hidden="true">👤 地上</span>
         </button>
-        <button class="control-btn" onclick="changeHeight(500)">
+        <button class="control-btn" onclick="changeHeight(500)" aria-label="俯瞰目線：地上500メートルの高さに移動" type="button">
           <span class="full-label">俯瞰目線 (地上500m)</span>
-          <span class="short-label">🦅 俯瞰</span>
+          <span class="short-label" aria-hidden="true">🦅 俯瞰</span>
         </button>
       </div>
 
-      <button id="capture-btn" onclick="captureMap()">地図を保存</button>
+      <button id="capture-btn" onclick="captureMap()" aria-label="現在表示中の地図を画像として保存" type="button">地図を保存</button>
 
       <div class="map-content-container">
         <div id="cesiumContainer" class="map-content active"></div>
@@ -879,43 +928,52 @@
 
     <div id="contentContainer">
       <iframe src="bousai-meeting.html"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
         referrerpolicy="strict-origin-when-cross-origin"
+        loading="lazy"
         title="もしもの防災会議"></iframe>
     </div>
   </div>
 
-  <div id="mobile-nav">
-    <div class="nav-item active" onclick="switchMobileTab('map')"><div class="nav-icon">🗺️</div><div>地図</div></div>
-    <div class="nav-item" onclick="switchMobileTab('quest')"><div class="nav-icon">📜</div><div>防災会議</div></div>
-  </div>
+  <nav id="mobile-nav" aria-label="モバイル用切替ナビゲーション">
+    <button class="nav-item active" onclick="switchMobileTab('map')" aria-label="地図画面に切り替え" type="button">
+      <div class="nav-icon" aria-hidden="true">🗺️</div><div>地図</div>
+    </button>
+    <button class="nav-item" onclick="switchMobileTab('quest')" aria-label="防災会議画面に切り替え" type="button">
+      <div class="nav-icon" aria-hidden="true">📜</div><div>防災会議</div>
+    </button>
+  </nav>
 
-  <!-- フッター（出典・著作権・免責） -->
+  <!-- フッター（出典・著作権・免責・参考文献） -->
   <footer id="site-footer">
     地図データ：&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors ／
     <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener noreferrer">国土地理院</a>（地理院タイル）／
     3D：<a href="https://cesium.com/" target="_blank" rel="noopener noreferrer">Cesium ion</a>
+    ｜ 参考：<a href="https://www.jma.go.jp/" target="_blank" rel="noopener noreferrer">気象庁</a> ／
+    <a href="https://www.bousai.go.jp/" target="_blank" rel="noopener noreferrer">内閣府防災情報</a> ／
+    <a href="https://www.fdma.go.jp/" target="_blank" rel="noopener noreferrer">消防庁</a> ／
+    <a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer">ハザードマップポータル</a>
     ｜ &copy; 2026 田口雅章
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
     ｜ 本コンテンツは教育目的の防災学習用途で提供されます。実災害時は公的機関の最新情報に従ってください。
   </footer>
 
   <script>
-    // file:// プロトコル警告
+    // file:// プロトコル警告（コンソール + 画面内バナー）
     if (window.location.protocol === 'file:') {
-      alert(
-        '⚠ 注意：このアプリは file:// プロトコルでは正しく動作しません。\n\n' +
-        '【症状】\n' +
-        '・3D地図の衛星写真が表示されない\n' +
-        '・地形（標高）が取得できない\n' +
-        '・「住民目線」「俯瞰目線」が地下に潜る\n\n' +
-        '【解決方法】\n' +
-        '以下のいずれかでローカルHTTPサーバー経由で開いてください：\n' +
-        '・VS Code「Live Server」拡張機能\n' +
-        '・python -m http.server 8000\n' +
-        '・npx serve\n\n' +
-        'または GitHub Pages 等にアップロードしてHTTPS経由でアクセスしてください。'
+      console.warn(
+        '⚠ このアプリは file:// プロトコルでは正しく動作しません。\n' +
+        'ローカルHTTPサーバー（VS Code Live Server / python -m http.server 等）経由でアクセスしてください。'
       );
+      // 画面内に控えめなバナーを表示
+      window.addEventListener('DOMContentLoaded', function() {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fbc02d;color:#212529;padding:8px 12px;text-align:center;font-size:12px;z-index:99999;border-bottom:2px solid #f57f17;';
+        banner.innerHTML =
+          '⚠ <strong>file://で開いています。</strong>3D地図が正しく動作しない可能性があります。' +
+          'ローカルHTTPサーバー（Live Server等）経由のアクセスを推奨します。' +
+          '<button onclick="this.parentElement.remove()" style="margin-left:10px;padding:2px 8px;cursor:pointer;">閉じる</button>';
+        document.body.appendChild(banner);
+      });
     }
     
     // CONFIG はトークンを空でスタート（利用者各自取得方式）
@@ -954,6 +1012,17 @@
       pickerMap.on('click', function(e) { pickerMarker.setLatLng(e.latlng); updateInputs(e.latlng.lat, e.latlng.lng); });
       document.getElementById('input-lat').addEventListener('change', updateMarkerFromInput);
       document.getElementById('input-lng').addEventListener('change', updateMarkerFromInput);
+
+      // localStorage に保存されたトークンがあれば復元
+      try {
+        const savedToken = localStorage.getItem('cesium_ion_token');
+        if (savedToken) {
+          document.getElementById('input-token').value = savedToken;
+          document.getElementById('input-token-remember').checked = true;
+        }
+      } catch (e) {
+        console.warn('localStorage の読み込みに失敗:', e);
+      }
     };
 
     function updateInputs(lat, lng) {
@@ -980,20 +1049,48 @@
       const lngInput = document.getElementById('input-lng').value;
       const tokenInput = document.getElementById('input-token').value;
       const depthInput = document.getElementById('input-depth').value;
+      const tokenRemember = document.getElementById('input-token-remember').checked;
 
+      // 入力値を取得（生の値のまま保持。エスケープは表示時に行う）
       const region = (document.getElementById('input-region').value || 'あなたの市町村').slice(0, 50);
       const shelter = (document.getElementById('input-shelter').value || 'あなたの近くの避難所').slice(0, 50);
       const river = (document.getElementById('input-river').value || 'あなたの近くの河川').slice(0, 50);
       const tsunamiBldg = (document.getElementById('input-tsunami-bldg').value || 'あなたの近くの津波避難ビル').slice(0, 50);
       const radio = (document.getElementById('input-radio').value || 'あなたの地域の防災ラジオ局').slice(0, 50);
 
-      if(latInput) CONFIG.lat = parseFloat(latInput);
-      if(lngInput) CONFIG.lng = parseFloat(lngInput);
-      if(tokenInput && tokenInput.trim() !== "") CONFIG.token = tokenInput.trim();
-      if(depthInput) {
-        CONFIG.tsunami.height = parseFloat(depthInput);
-        document.getElementById('tsunami-range').value = depthInput;
-        document.getElementById('height-val').innerText = parseFloat(depthInput).toFixed(1);
+      // 緯度経度の妥当性検証
+      if (latInput) {
+        const lat = parseFloat(latInput);
+        if (!isNaN(lat) && lat >= -90 && lat <= 90) CONFIG.lat = lat;
+      }
+      if (lngInput) {
+        const lng = parseFloat(lngInput);
+        if (!isNaN(lng) && lng >= -180 && lng <= 180) CONFIG.lng = lng;
+      }
+
+      // トークン処理（localStorage 保存対応）
+      if (tokenInput && tokenInput.trim() !== "") {
+        CONFIG.token = tokenInput.trim();
+        if (tokenRemember) {
+          try {
+            localStorage.setItem('cesium_ion_token', CONFIG.token);
+          } catch (e) {
+            console.warn('localStorage への保存に失敗しました:', e);
+          }
+        } else {
+          try {
+            localStorage.removeItem('cesium_ion_token');
+          } catch (e) { /* 無視 */ }
+        }
+      }
+
+      if (depthInput) {
+        const depth = parseFloat(depthInput);
+        if (!isNaN(depth) && depth >= 0 && depth <= 30) {
+          CONFIG.tsunami.height = depth;
+          document.getElementById('tsunami-range').value = depth;
+          document.getElementById('height-val').innerText = depth.toFixed(1);
+        }
       }
 
       // iframe の src に設定内容を URL パラメータとして渡す
@@ -1011,7 +1108,6 @@
       initAllMaps();
 
       // 初期表示は Cesium 3D タブなので、対応する UI を表示する
-      // （初回ロード時に showMap() が呼ばれていないための補完）
       setUIVisibility('capture-btn', true, 'block');
       setUIVisibility('cesium-ui', true, 'flex');
       setUIVisibility('tsunami-ui', true, 'block');
@@ -1019,6 +1115,19 @@
     }
 
     function showMap(event, mapId) {
+      const isCesiumFeature = (mapId === 'cesiumContainer' || mapId === 'realMap' || mapId === 'nige-chizu');
+
+      // トークン未設定でCesium機能を選んだ場合、案内を出して中断
+      if (isCesiumFeature && !CONFIG.token) {
+        const proceed = confirm(
+          'この機能（' + event.currentTarget.innerText + '）は\n' +
+          'Cesium ion アクセストークンが必要です。\n\n' +
+          'OK：そのまま開く（地図は表示されません）\n' +
+          'キャンセル：別のタブ（OpenStreetMap等）をご利用ください'
+        );
+        if (!proceed) return;
+      }
+
       document.querySelectorAll('.map-content').forEach(el => { el.classList.remove('active'); el.style.visibility = 'hidden'; });
       document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
       event.currentTarget.classList.add('active');

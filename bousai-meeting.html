@@ -10,6 +10,16 @@
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta name="robots" content="index, follow">
 
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    connect-src 'self';
+    frame-ancestors 'self';
+  ">
+
   <style>
     /* デザイン設定 */
     :root {
@@ -127,6 +137,12 @@
       transition: 0.2s;
       background: white;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      /* button要素のデフォルトを打ち消す */
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      width: 100%;
+      display: block;
     }
     .menu-card:hover {
       transform: translateY(-3px);
@@ -226,6 +242,16 @@
       padding: 12px;
     }
     .site-footer a { color: #1565c0; }
+  
+    /* フォーカスインジケータ（キーボード操作対応） */
+    button:focus-visible,
+    input:focus-visible,
+    a:focus-visible,
+    .menu-card:focus-visible,
+    .choice-btn:focus-visible {
+      outline: 3px solid #ffc107;
+      outline-offset: 2px;
+    }
 
     /* 印刷時は表彰状だけを綺麗に印刷する */
     @media print {
@@ -337,28 +363,28 @@
     <div id="main-menu" class="screen active">
       <h2 style="text-align:center;">コースを選択してください</h2>
       <div class="menu-grid">
-        <div class="menu-card" onclick="app.showDisasterMenu()">
-          <span class="menu-icon">🌪️</span>
+        <button class="menu-card" onclick="app.showDisasterMenu()" type="button" aria-label="自然災害・避難編：地震・津波・洪水など発災直後の命を守る判断を学ぶ">
+          <span class="menu-icon" aria-hidden="true">🌪️</span>
           <h3>自然災害・避難編</h3>
           <p>地震・津波・洪水など<br>発災直後の「命を守る判断」</p>
-        </div>
+        </button>
 
-        <div class="menu-card" onclick="app.showRegionPrep()">
-          <span class="menu-icon">🗺️</span>
+        <button class="menu-card" onclick="app.showRegionPrep()" type="button" aria-label="地域編：地図を見て自分の地域について調べて答える">
+          <span class="menu-icon" aria-hidden="true">🗺️</span>
           <h3>地域編</h3>
           <p>地図（防災マップ・ハザードマップ）を見て<br>「自分の地域」を調べて答える</p>
-        </div>
+        </button>
 
-        <div class="menu-card" onclick="app.start('shelter')">
-          <span class="menu-icon">🏫</span>
+        <button class="menu-card" onclick="app.start('shelter')" type="button" aria-label="避難所運営編：リーダーとしてトイレ・衛生・防犯などのトラブルを解決">
+          <span class="menu-icon" aria-hidden="true">🏫</span>
           <h3>避難所運営編</h3>
           <p>リーダーとしてトラブル解決<br>トイレ・衛生・防犯</p>
-        </div>
-        <div class="menu-card" onclick="app.start('volunteer')">
-          <span class="menu-icon">🤝</span>
+        </button>
+        <button class="menu-card" onclick="app.start('volunteer')" type="button" aria-label="ボランティア編：支援の心得・マナー・安全管理">
+          <span class="menu-icon" aria-hidden="true">🤝</span>
           <h3>ボランティア編</h3>
           <p>支援の心得とマナー<br>安全管理とトラブル防止</p>
-        </div>
+        </button>
       </div>
     </div>
 
@@ -366,24 +392,24 @@
     <div id="disaster-menu" class="screen">
       <h2 style="text-align:center;">災害の種類を選択</h2>
       <div class="menu-grid">
-        <div class="menu-card" onclick="app.start('earthquake')">
-          <span class="menu-icon">🏚️</span><h3>地震</h3>
-        </div>
-        <div class="menu-card" onclick="app.start('tsunami')">
-          <span class="menu-icon">🌊</span><h3>津波</h3>
-        </div>
-        <div class="menu-card" onclick="app.start('flood')">
-          <span class="menu-icon">☔</span><h3>洪水・豪雨</h3>
-        </div>
-        <div class="menu-card" onclick="app.start('landslide')">
-          <span class="menu-icon">⛰️</span><h3>土砂崩れ</h3>
-        </div>
-        <div class="menu-card" onclick="app.start('fire')">
-          <span class="menu-icon">🔥</span><h3>火災</h3>
-        </div>
+        <button class="menu-card" onclick="app.start('earthquake')" type="button" aria-label="地震編を開始">
+          <span class="menu-icon" aria-hidden="true">🏚️</span><h3>地震</h3>
+        </button>
+        <button class="menu-card" onclick="app.start('tsunami')" type="button" aria-label="津波編を開始">
+          <span class="menu-icon" aria-hidden="true">🌊</span><h3>津波</h3>
+        </button>
+        <button class="menu-card" onclick="app.start('flood')" type="button" aria-label="洪水・豪雨編を開始">
+          <span class="menu-icon" aria-hidden="true">☔</span><h3>洪水・豪雨</h3>
+        </button>
+        <button class="menu-card" onclick="app.start('landslide')" type="button" aria-label="土砂崩れ編を開始">
+          <span class="menu-icon" aria-hidden="true">⛰️</span><h3>土砂崩れ</h3>
+        </button>
+        <button class="menu-card" onclick="app.start('fire')" type="button" aria-label="火災編を開始">
+          <span class="menu-icon" aria-hidden="true">🔥</span><h3>火災</h3>
+        </button>
       </div>
       <div style="text-align:center;">
-        <button class="nav-btn back-btn" onclick="app.showMainMenu()">戻る</button>
+        <button class="nav-btn back-btn" onclick="app.showMainMenu()" type="button">戻る</button>
       </div>
     </div>
 
@@ -528,9 +554,13 @@
     </div>
   </div>
 
-  <!-- フッター（出典・著作権・免責） -->
+  <!-- フッター（出典・著作権・免責・参考文献） -->
   <footer class="site-footer">
     ※ 本シミュレーションは学習用途の参考情報です。実際の災害時は気象庁・自治体・消防など公的機関の最新情報に従って行動してください。<br>
+    参考：<a href="https://www.jma.go.jp/" target="_blank" rel="noopener noreferrer">気象庁</a> ／
+    <a href="https://www.bousai.go.jp/" target="_blank" rel="noopener noreferrer">内閣府防災情報</a> ／
+    <a href="https://www.fdma.go.jp/" target="_blank" rel="noopener noreferrer">消防庁</a> ／
+    <a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer">ハザードマップポータル</a><br>
     &copy; 2026 田口雅章
     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
     ｜ 地図関連データ：&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors ／
@@ -540,19 +570,12 @@
 
   <script>
     // ==========================================
-    // 設定 (URL パラメータから取得・XSS対策＆長さ制限）
+    // 設定 (URL パラメータから取得・長さ制限のみ。エスケープは出力時に実施）
     // ==========================================
     function getConfigFromURL() {
       const params = new URLSearchParams(window.location.search);
-      // HTMLエスケープ関数
-      const esc = (s) => String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-      // 長さ制限も追加（DoS対策）
-      const safe = (key, def) => esc((params.get(key) || def).slice(0, 100));
+      // 長さ制限のみ（DoS対策）。値はエスケープせず生のまま保持。
+      const safe = (key, def) => (params.get(key) || def).slice(0, 100);
       return {
         region: safe('region', 'あなたの市町村'),
         shelter: safe('shelter', 'あなたの近くの避難所'),
@@ -564,7 +587,28 @@
 
     const CONFIG = getConfigFromURL();
 
+    // HTMLエスケープ関数（innerHTMLに渡す値を安全にする）
+    function escapeHTML(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // テンプレート展開：innerHTMLに渡す用（エスケープあり）
     function t(text) {
+      return text
+        .replace(/{region}/g, escapeHTML(CONFIG.region))
+        .replace(/{shelter}/g, escapeHTML(CONFIG.shelter))
+        .replace(/{river}/g, escapeHTML(CONFIG.river))
+        .replace(/{tsunami_bldg}/g, escapeHTML(CONFIG.tsunami_bldg))
+        .replace(/{radio_station}/g, escapeHTML(CONFIG.radio_station));
+    }
+
+    // テンプレート展開：innerText/textContentに渡す用（エスケープなし）
+    function tPlain(text) {
       return text
         .replace(/{region}/g, CONFIG.region)
         .replace(/{shelter}/g, CONFIG.shelter)
@@ -574,9 +618,9 @@
     }
 
     window.addEventListener('DOMContentLoaded', function() {
+      // innerText には生の値を入れる（ブラウザが自動的にエスケープ処理する）
       document.getElementById("config-region").innerText = CONFIG.region;
     });
-
 
     // ==========================================
     // 全シナリオデータ
@@ -587,7 +631,6 @@
         {
           title: "はじめに：今日の「調べる地点」を決めよう",
           noChoices: true,
-          isIntro: true,
           text:
             "次の3つから、今日はどれを調べるか選んで書いてください（できれば全部）。<br><br>" +
             "・いまいる場所（会場）<br>" +
@@ -688,14 +731,14 @@
 
       // --- 自然災害編 ---
       earthquake: [
-        { title: "屋内で揺れた時", text: "キッチンで火を使っている最中に激しい揺れが来ました。", timeLimit: 10, choices: [{text:"すぐに火を消そうとする",correct:false}, {text:"まずはテーブルの下などで身を守る",correct:true}], explanation: "火傷や落下物で怪我をするリスクが高いです。今のコンロは震度5程度で自動消火します。まずは身の安全です。", point:"Point: 火の始末より、まずは身の安全。" },
+        { title: "屋内で揺れた時", text: "キッチンで火を使っている最中に激しい揺れが来ました。", timeLimit: 10, choices: [{text:"すぐに火を消そうとする",correct:false}, {text:"まずはテーブルの下などで身を守る",correct:true}], explanation: "火傷や落下物で怪我をするリスクが高いです。最近のガスコンロには感震自動消火機能（マイコンメーターでガスが自動遮断される）が付いている機種が多いため、揺れが収まってから安全に火を止められます。まずは身の安全を確保しましょう。", point:"Point: 火の始末より、まずは身の安全。揺れが収まってから対処を。" },
         { title: "情報断絶の暗闇", text: "揺れは収まりましたが停電で真っ暗。スマホも圏外です。津波の有無も不明です。", timeLimit: 15, choices: [{text:"余震が怖いので動かない",correct:false}, {text:"ポケットラジオで公式情報を探る",correct:true}], explanation: "情報がない状態が一番危険です。アナログなラジオで正しい情報を得て行動を決めてください。", point:"Point: 災害時の命綱はポケットラジオ。" },
         { title: "屋外ブロック塀", text: "住宅街のブロック塀のそばを歩行中に揺れました。", timeLimit: 5, choices: [{text:"塀に捕まる",correct:false}, {text:"塀から離れて低い姿勢をとる",correct:true}], explanation: "ブロック塀は倒壊して下敷きになる危険が高いです。", point:"Point: 塀や自販機からは即座に離れる。" },
         { title: "ガラス散乱", text: "部屋中ガラスだらけで避難できません。", timeLimit: 10, choices: [{text:"そのまま走る",correct:false}, {text:"厚底の靴（無ければ雑誌等）を履く",correct:true}], explanation: "足裏を怪我すると移動不能になり、避難できなくなります。", point:"Point: 寝室にはスリッパや靴を備えておく。" },
         { title: "ドアが開かない", text: "ドアが歪んで開きません。", timeLimit: 10, choices: [{text:"ドアを叩き続ける",correct:false}, {text:"窓ガラスを割るかベランダの隔て板を破る",correct:true}], explanation: "閉じ込められた場合、別の脱出口を確保する必要があります。", point:"Point: 複数の脱出ルートを確認しておく。" },
         { title: "通電火災防止", text: "避難所へ向かいます。", timeLimit: 10, choices: [{text:"すぐに出る",correct:false}, {text:"ブレーカーを落としてから出る",correct:true}], explanation: "停電復旧時に破損したコードから発火する「通電火災」を防ぐためです。", point:"Point: 避難時はブレーカーOFF。" },
         { title: "忘れ物", text: "スマホを忘れました。", timeLimit: 5, choices: [{text:"急いで取りに戻る",correct:false}, {text:"絶対に戻らない",correct:true}], explanation: "余震で家屋が倒壊する恐れがあります。命より大事なものはありません。", point:"Point: 一度出たら絶対に戻らない。" },
-        { title: "エレベーター", text: "エレベーター内で揺れました。", timeLimit: 5, choices: [{text:"1階を押す",correct:false}, {text:"全ての階のボタンを押す",correct:true}], explanation: "最寄りの階で止まり、閉じ込めを防ぐ確率を上げます。", point:"Point: 全階ボタン押しで脱出確率アップ。" },
+        { title: "エレベーター", text: "エレベーター内で揺れました。", timeLimit: 5, choices: [{text:"1階まで降りる",correct:false}, {text:"全ての階のボタンを押し、最初に止まった階で降りる",correct:true}], explanation: "最近のエレベーターは地震時管制運転装置により最寄り階で自動停止しますが、古い機種では作動しない場合もあります。全階ボタンを押すことで停止確率を上げ、止まったらすぐに降りるのが鉄則。閉じ込められた場合は非常ボタンで通報し、無理に脱出しないでください。", point:"Point: 全階ボタン→最初に止まった階で降りる。閉じ込められたら非常ボタンで通報。" },
         { title: "運転中", text: "車を運転中に揺れました。", timeLimit: 5, choices: [{text:"急ブレーキ",correct:false}, {text:"ハザードを点け左に寄せて停止",correct:true}], explanation: "急ブレーキは追突事故の元です。ゆっくり減速して停止します。", point:"Point: 道路の真ん中は緊急車両用に空ける。" },
         { title: "安否確認", text: "家族と連絡が取れません。", timeLimit: 10, choices: [{text:"探しに行く",correct:false}, {text:"災害用伝言ダイヤル(171)等を使い、集合場所へ",correct:true}], explanation: "すれ違いや二次災害を防ぐため、事前に決めた方法で連絡を取ります。", point:"Point: 災害用伝言板の使いかたを覚えておく。" }
       ],
@@ -704,7 +747,7 @@
         { title: "避難場所の選定", text: "指定避難所は遠いです。目の前に「{tsunami_bldg}」があります。", timeLimit: 10, choices: [{text:"どのビルでもいいから入る",correct:false}, {text:"「津波避難ビル」マークを確認して入る",correct:true}], explanation: "津波避難ビルは強度が保証され、誰でも入れる協定があります。", point:"Point: 緑の三角マークが目印。" },
         { title: "引き波", text: "海の水が引いて海底が見えます。", timeLimit: 10, choices: [{text:"見に行く",correct:false}, {text:"全力で海から離れる",correct:true}], explanation: "引き波は巨大津波の前兆です。絶対に見に行ってはいけません。", point:"Point: 海の異変は死の合図。" },
         { title: "車避難の罠", text: "高齢者がいます。車で逃げるか迷っています。", timeLimit: 10, choices: [{text:"車で避難",correct:false}, {text:"可能な限り徒歩で高台へ",correct:true}], explanation: "車は渋滞に巻き込まれ、津波に飲まれるリスクが非常に高いです。", point:"Point: 原則は徒歩避難。" },
-        { title: "第一波の後", text: "波が引きました。家が心配です。", timeLimit: 10, choices: [{text:"様子を見に戻る",correct:false}, {text:"警報解除まで絶対に戻らない",correct:true}], explanation: "津波は第二波、第三波が大きくなることが多いです。", point:"Point: 津波は何度も来る。" },
+        { title: "第一波の後", text: "波が引きました。家が心配です。", timeLimit: 10, choices: [{text:"様子を見に戻る",correct:false}, {text:"警報解除まで絶対に戻らない",correct:true}], explanation: "津波は第一波より後の波の方が大きくなることがあります（東日本大震災では第二波・第三波が最大となった地域もありました）。波の到達は数時間にわたって続くこともあるため、警報・注意報が解除されるまで絶対に海岸や河川には近づかないでください。", point:"Point: 津波は何度も来る。第一波より後の波が大きいこともある。" },
         { title: "サイレン沈黙", text: "停電で屋外スピーカーが鳴っていません。", timeLimit: 15, choices: [{text:"警報なしと判断",correct:false}, {text:"ラジオで確認しつつ逃げる",correct:true}], explanation: "スピーカー故障を疑い、ラジオで情報を補完してください。", point:"Point: 静寂を安全と思わない。" },
         { title: "寒さ対策", text: "冬の夜、パジャマ姿で逃げました。", timeLimit: 5, choices: [{text:"コートを取りに戻る",correct:false}, {text:"そのまま逃げる",correct:true}], explanation: "寒さより津波の方が即死リスクが高いです。途中で新聞紙などを拾って暖を取ります。", point:"Point: 命が最優先。" },
         { title: "川の逆流", text: "海から遠いですが、大きな川の近くです。", timeLimit: 10, choices: [{text:"海じゃないから安心",correct:false}, {text:"川から直角に離れる",correct:true}], explanation: "津波は川を遡上し、堤防を越えて溢れます。", point:"Point: 川も海の延長。" },
@@ -713,7 +756,7 @@
       ],
       flood: [
         { title: "避難タイミング", text: "高齢者等避難が出ましたが、自分は若いです。", timeLimit: 10, choices: [{text:"待機",correct:false}, {text:"暗くなる前に早めに避難",correct:true}], explanation: "夜間の避難は危険です。明るいうちに動くのが鉄則です。", point:"Point: リードタイム（逃げる時間）を確保。" },
-        { title: "真夜中の豪雨", text: "夜中、{river}の水位が不明です。", timeLimit: 10, choices: [{text:"見に行く",correct:false}, {text:"ラジオで確認し垂直避難",correct:true}], explanation: "夜に川を見に行くのは自殺行為です。自宅の2階以上で安全確保します。", point:"Point: 水位確認はネットかラジオで。" },
+        { title: "真夜中の豪雨", text: "夜中、{river}の水位が不明です。", timeLimit: 10, choices: [{text:"見に行く",correct:false}, {text:"ラジオで確認し、状況に応じて垂直避難",correct:true}], explanation: "夜間に川を見に行くのは大変危険です（過去の災害では多くの方が川の様子を見に行って亡くなっています）。ただし、家屋の立地によっては垂直避難（自宅2階等）でも安全とは限りません。浸水想定3m以上の地域や土砂災害警戒区域、木造平屋・1階建ての場合は、明るいうちに立退き避難が必要です。事前にハザードマップで自宅のリスクを確認しておきましょう。", point:"Point: 水位確認はネットかラジオで。立退き避難か垂直避難かは、ハザードマップで事前に判断を。" },
         { title: "冠水道路", text: "道路が水没しています。", timeLimit: 10, choices: [{text:"長靴を履く",correct:false}, {text:"紐付き運動靴を履く",correct:true}], explanation: "長靴は水が入ると重くなり動けなくなります。", point:"Point: 水中歩行はスニーカーで。" },
         { title: "杖の使用", text: "濁った水の中を歩きます。", timeLimit: 10, choices: [{text:"急いで歩く",correct:false}, {text:"傘などで足元を探りながら",correct:true}], explanation: "マンホールの蓋が外れている可能性があります。", point:"Point: 見えない足元に罠がある。" },
         { title: "アンダーパス", text: "車で高架下を通れば近道です。", timeLimit: 5, choices: [{text:"一気に抜ける",correct:false}, {text:"迂回する",correct:true}], explanation: "アンダーパスは急激に冠水し、車が水没する危険地帯です。", point:"Point: 冠水時のアンダーパスは進入禁止。" },
@@ -953,9 +996,9 @@
         clearInterval(this.timer);
         timerArea.style.display = "none";
 
-        // 問題文
+        // 問題文（タイトルもエスケープ）
         sitArea.innerHTML =
-          `<div style="font-weight:bold; margin-bottom:10px; color:#555;">Q${this.index + 1}. ${data.title}</div>` +
+          `<div style="font-weight:bold; margin-bottom:10px; color:#555;">Q${this.index + 1}. ${escapeHTML(data.title)}</div>` +
           `${t(data.text)}`;
 
         choicesArea.innerHTML = "";
@@ -976,11 +1019,12 @@
           return;
         }
 
-        // 選択肢（通常）
+        // 選択肢（通常）。innerTextはブラウザが自動エスケープするのでtPlainを使用
         data.choices.forEach((c) => {
           const btn = document.createElement("button");
           btn.className = "choice-btn";
-          btn.innerText = t(c.text);
+          btn.innerText = tPlain(c.text);
+          btn.type = "button";
           btn.onclick = () => this.answer(c, data);
           choicesArea.appendChild(btn);
         });
@@ -1045,7 +1089,7 @@
         const choiceLabel = isCorrect ? "⭕" : "❌";
         qArea.innerHTML = `
           <div style="font-weight:bold; margin-bottom:8px; color:#555;">
-            📖 問題（Q${this.index + 1}）：${data.title}
+            📖 問題（Q${this.index + 1}）：${escapeHTML(data.title)}
           </div>
           <div style="margin-bottom:10px; line-height:1.7;">${t(data.text)}</div>
           <div style="margin-top:10px; padding:8px 12px; background:white; border-radius:4px; border:1px solid #ccc;">
@@ -1073,8 +1117,9 @@
       },
 
       // 表彰状：受講者名の反映（末尾に「 殿」を付ける）
+      // ※ innerText を使用しているためブラウザが自動的にエスケープする（XSS対策済み）
       setCertName: function (name) {
-        const v = (name || "").trim();
+        const v = (name || "").trim().slice(0, 40);  // 長さ制限
         const el = document.getElementById("cert-name-display");
         if (!el) return;
         el.innerText = v ? `${v} 殿` : "（未入力）";
@@ -1121,7 +1166,7 @@
           revContent.innerHTML = this.log
             .map((item) => `
               <div class="review-item">
-                <strong>❌ ${item.title}</strong><br>
+                <strong>❌ ${escapeHTML(item.title)}</strong><br>
                 ${t(item.point)}
               </div>
             `)

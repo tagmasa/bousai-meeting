@@ -8,6 +8,13 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta name="robots" content="index, follow">
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    frame-ancestors 'self';
+  ">
 
 <style>
 @page { size: A3 landscape; margin: 8mm; }
@@ -321,8 +328,11 @@ th{
   </div>
 </div>
 
-<!-- フッター（出典・著作権・免責） -->
+<!-- フッター（出典・著作権・免責・参考文献） -->
 <div class="footer">
+  参考：<a href="https://www.jma.go.jp/" target="_blank" rel="noopener noreferrer">気象庁</a> ／
+  <a href="https://www.bousai.go.jp/" target="_blank" rel="noopener noreferrer">内閣府防災情報</a> ／
+  <a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer">ハザードマップポータル</a><br>
   &copy; 2026 田口雅章
   <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
   ｜ 本ワークシートは学習用途で提供されます。実災害時は公的機関の最新情報に従ってください。
