@@ -21,142 +21,682 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin="anonymous"></script>
 
-  <style>
-    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
-    #main-container { display: flex; width: 100%; height: 100%; }
-    #mapWrapper { flex: 1; height: 100%; display: flex; flex-direction: column; background-color: #000; position: relative; }
-    #contentContainer { flex: 1; height: 100%; border-left: 2px solid #333; background: #fff; }
-    #mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #222; border-top: 1px solid #444; z-index: 9999; justify-content: space-around; align-items: center; }
-    .nav-item { color: #888; text-align: center; flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 10px; cursor: pointer; }
-    .nav-item.active { color: #0078d4; background: #333; }
-    .nav-icon { font-size: 20px; margin-bottom: 2px; }
+<style>
+  /* =====================================================
+     【1】ベース・レイアウト
+     ===================================================== */
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: sans-serif;
+  }
 
-    #config-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-    .config-box { background: #222; padding: 25px; border-radius: 8px; border: 1px solid #444; width: 90%; max-width: 500px; box-shadow: 0 0 20px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto; }
-    .config-row { margin-bottom: 15px; }
-    .config-row label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #ccc; }
-    .config-row input { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; box-sizing: border-box; }
-    .lat-lng-container { display: flex; gap: 10px; }
-    .ref-link { font-size: 12px; color: #66b2ff; text-decoration: none; display: inline-block; margin-top: 4px; border-bottom: 1px dashed #66b2ff; word-break: break-all; }
-    #picker-map { width: 100%; height: 250px; border-radius: 4px; border: 1px solid #555; margin-bottom: 15px; cursor: crosshair; }
-    .map-instruction { font-size: 11px; color: #888; text-align: center; margin-bottom: 8px; }
-    .start-btn { width: 100%; padding: 12px; background: #0078d4; color: white; border: none; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-    .token-note { font-size: 11px; color: #ffd479; margin-top: 6px; line-height: 1.5; background: #2a2416; padding: 8px; border-radius: 4px; border-left: 3px solid #ffc107; }
+  #main-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
 
-    .tab-menu { background: #222; display: flex; flex-wrap: wrap; padding: 10px; gap: 8px; z-index: 100; border-bottom: 1px solid #444; }
-    .tab-button { background: #444; color: #ddd; border: none; padding: 6px 12px; cursor: pointer; font-size: 12px; border-radius: 4px; }
-    .tab-button.active { background: #0078d4; color: white; font-weight: bold; }
+  #mapWrapper {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #000;
+    position: relative;
+  }
 
-    /* PCでのデフォルト位置 */
-    .tsunami-slider-panel { position: absolute; top: 130px; left: 20px; z-index: 1000; background: rgba(0, 0, 0, 0.85); color: white; padding: 15px; border-radius: 8px; width: 240px; border: 2px solid #0056b3; display: none; max-height: calc(100vh - 280px);overflow-y: auto;}
-    
-    /* 逃げ地図パネル：デフォルト（PC） */
-    .nigechizu-panel { position: absolute; top: 130px; left: 20px; z-index: 1000; background: rgba(0, 0, 0, 0.85); color: white; padding: 15px; border-radius: 8px; width: 240px; border: 2px solid #28a745; display: none;max-height: calc(100vh - 280px);overflow-y: auto; }
-    .legend-item { display: flex; align-items: center; margin-bottom: 5px; font-size: 13px; }
-    .color-box { width: 15px; height: 15px; display: inline-block; margin-right: 8px; border-radius: 50%; }
+  #contentContainer {
+    flex: 1;
+    height: 100%;
+    border-left: 2px solid #333;
+    background: #fff;
+  }
 
-    .map-controls { position: absolute; bottom: 90px; left: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-    .control-btn { background: rgba(0,0,0,0.8); color: white; border: 1px solid #666; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
-    #capture-btn { position: absolute; bottom: 90px; right: 20px; z-index: 1000; background: #e83e8c; color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
 
-    .map-content-container { position: relative; flex: 1; width: 100%; height: 100%; }
-    .map-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; visibility: hidden; overflow: auto; -webkit-overflow-scrolling: touch; }
-    .map-content.active { visibility: visible; }
+  /* =====================================================
+     【2】モバイルナビゲーション（下部）
+     ===================================================== */
+  #mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #222;
+    border-top: 1px solid #444;
+    z-index: 9999;
+    justify-content: space-around;
+    align-items: center;
+  }
 
-    .help-page { background: #fff; padding: 40px; line-height: 1.8; color: #333; }
-    .external-link-container { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #333; color: white; }
-    .open-btn { background: #ffc107; color: #212529; padding: 15px 30px; font-size: 18px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
-    iframe { width: 100%; height: 100%; border: none; }
+  .nav-item {
+    color: #888;
+    text-align: center;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    cursor: pointer;
+  }
 
-    /* Cesium のロゴ・クレジット表示をフッターに被らないよう上にずらす */
-    .cesium-viewer-bottom {
-      bottom: 50px !important;  /* PC：フッター + 余白を考慮 */
+  .nav-item.active {
+    color: #0078d4;
+    background: #333;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  /* =====================================================
+     【3】初期設定画面
+     ===================================================== */
+  #config-screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: #111;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .config-box {
+    background: #222;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .config-row {
+    margin-bottom: 15px;
+  }
+
+  .config-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .config-row input {
+    width: 100%;
+    padding: 8px;
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  .lat-lng-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ref-link {
+    font-size: 12px;
+    color: #66b2ff;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+    border-bottom: 1px dashed #66b2ff;
+    word-break: break-all;
+  }
+
+  #picker-map {
+    width: 100%;
+    height: 250px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    margin-bottom: 15px;
+    cursor: crosshair;
+  }
+
+  .map-instruction {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .start-btn {
+    width: 100%;
+    padding: 12px;
+    background: #0078d4;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .token-note {
+    font-size: 11px;
+    color: #ffd479;
+    margin-top: 6px;
+    line-height: 1.5;
+    background: #2a2416;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 3px solid #ffc107;
+  }
+
+  /* =====================================================
+     【4】タブメニュー
+     ===================================================== */
+  .tab-menu {
+    background: #222;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 8px;
+    z-index: 100;
+    border-bottom: 1px solid #444;
+  }
+
+  .tab-button {
+    background: #444;
+    color: #ddd;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .tab-button.active {
+    background: #0078d4;
+    color: white;
+    font-weight: bold;
+  }
+
+  /* =====================================================
+     【5】津波・逃げ地図パネル（PCデフォルト）
+     ===================================================== */
+  .tsunami-slider-panel {
+    position: absolute;
+    top: 130px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 240px;
+    border: 2px solid #0056b3;
+    display: none;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+  }
+
+  .nigechizu-panel {
+    position: absolute;
+    top: 130px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    width: 240px;
+    border: 2px solid #28a745;
+    display: none;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 13px;
+  }
+
+  .color-box {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin-right: 8px;
+    border-radius: 50%;
+  }
+
+  /* =====================================================
+     【6】パネル折りたたみ機能（津波・逃げ地図共通）
+     ===================================================== */
+  .panel-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 8px 0;
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: bold;
+    border-bottom: 1px solid #555;
+  }
+
+  .panel-toggle .toggle-arrow {
+    margin-left: auto;
+    transition: transform 0.3s;
+    font-size: 12px;
+  }
+
+  /* 折りたたみ時 */
+  .tsunami-slider-panel.collapsed,
+  .nigechizu-panel.collapsed {
+    width: auto;
+    min-width: 180px;
+    padding: 8px 12px;
+    max-height: none;
+  }
+
+  .tsunami-slider-panel.collapsed .panel-content,
+  .nigechizu-panel.collapsed .panel-content {
+    display: none;
+  }
+
+  .tsunami-slider-panel.collapsed .panel-toggle,
+  .nigechizu-panel.collapsed .panel-toggle {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .tsunami-slider-panel.collapsed .panel-toggle .toggle-arrow,
+  .nigechizu-panel.collapsed .panel-toggle .toggle-arrow {
+    transform: rotate(-90deg);
+  }
+
+  /* =====================================================
+     【7】注意文ボタン・モーダル
+     ===================================================== */
+  .warning-btn {
+    background: #5a1f1f;
+    color: #ffcdd2;
+    border: 1px solid #ff5252;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .warning-btn:hover {
+    background: #7a2f2f;
+  }
+
+  .warning-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .warning-modal-box {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .warning-modal-box h3 {
+    color: #d32f2f;
+    margin: 0 0 15px;
+    font-size: 1.2em;
+  }
+
+  .warning-modal-box ul {
+    line-height: 1.8;
+    padding-left: 22px;
+    margin: 0 0 15px;
+    color: #333;
+  }
+
+  .warning-modal-box .close-btn {
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: #1565c0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1em;
+    font-weight: bold;
+  }
+
+  /* =====================================================
+     【8】マップコントロール・キャプチャボタン
+     ===================================================== */
+  .map-controls {
+    position: absolute;
+    bottom: 90px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .control-btn {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border: 1px solid #666;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  /* PCではコントロールボタンの短縮ラベルを非表示 */
+  .control-btn .short-label {
+    display: none;
+  }
+  .control-btn .full-label {
+    display: inline;
+  }
+
+  #capture-btn {
+    position: absolute;
+    bottom: 90px;
+    right: 20px;
+    z-index: 1000;
+    background: #e83e8c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  /* =====================================================
+     【9】マップコンテンツ表示エリア
+     ===================================================== */
+  .map-content-container {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .map-content.active {
+    visibility: visible;
+  }
+
+  .help-page {
+    background: #fff;
+    padding: 40px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .external-link-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    color: white;
+  }
+
+  .open-btn {
+    background: #ffc107;
+    color: #212529;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+
+  /* =====================================================
+     【10】Cesium クレジット表示の調整
+     ===================================================== */
+  .cesium-viewer-bottom {
+    bottom: 50px !important;
+  }
+
+  .cesium-credit-logoContainer,
+  .cesium-credit-textContainer,
+  .cesium-credit-expand-link {
+    background: rgba(255, 255, 255, 0.85) !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+  }
+
+  /* =====================================================
+     【11】サイトフッター（著作権・免責）
+     ===================================================== */
+  #site-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(34, 34, 34, 0.92);
+    color: #aaa;
+    font-size: 10px;
+    padding: 4px 8px;
+    text-align: center;
+    z-index: 9998;
+    line-height: 1.4;
+    border-top: 1px solid #444;
+  }
+
+  #site-footer a {
+    color: #9cf;
+  }
+
+  .cesium-needed-warning {
+    display: none;
+    background: #5a3d00;
+    color: #ffe082;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    margin: 5px 10px;
+  }
+
+  /* =====================================================
+     【12】モバイル対応 (768px以下) ※全モバイル指定をここに集約
+     ===================================================== */
+  @media (max-width: 768px) {
+    /* レイアウト切替 */
+    #main-container {
+      display: block;
+      height: calc(100% - 60px);
     }
-    .cesium-credit-logoContainer,
-    .cesium-credit-textContainer,
-    .cesium-credit-expand-link {
-      /* 視認性を確保 */
-      background: rgba(255, 255, 255, 0.85) !important;
-      padding: 2px 6px !important;
-      border-radius: 3px !important;
-    }
-
-    /* フッター（出典・著作権・免責） */
-    #site-footer {
-      position: fixed;
-      bottom: 0; left: 0;
+    #mapWrapper {
       width: 100%;
-      background: rgba(34, 34, 34, 0.92);
-      color: #aaa;
-      font-size: 10px;
-      padding: 4px 8px;
-      text-align: center;
-      z-index: 9998;
-      line-height: 1.4;
-      border-top: 1px solid #444;
+      height: 100%;
+      display: flex;
     }
-    #site-footer a { color: #9cf; }
-
-    .cesium-needed-warning {
+    #contentContainer {
+      width: 100%;
+      height: 100%;
       display: none;
-      background: #5a3d00;
-      color: #ffe082;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      text-align: center;
-      margin: 5px 10px;
+      border: none;
+    }
+    #mobile-nav {
+      display: flex;
     }
 
-    /* --- スマホ・タブレット縦持ち (768px未満) の調整 --- */
-    @media (max-width: 768px) {
-      #main-container { display: block; height: calc(100% - 60px); }
-      #mapWrapper { width: 100%; height: 100%; display: flex; }
-      #contentContainer { width: 100%; height: 100%; display: none; border: none; }
-      #mobile-nav { display: flex; }
-
-      .tab-menu { overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
-      .tab-button { padding: 8px 14px; font-size: 13px; flex-shrink: 0; }
-
-      .lat-lng-container { flex-direction: column; gap: 15px; }
-
-      .map-controls { bottom: 140px; left: 10px; }
-      #capture-btn { bottom: 140px; right: 10px; }
-
-      .tsunami-slider-panel {
-        top: 110px;
-        left: 10px;
-        width: 200px;
-        max-height: calc(100vh - 320px);
-        overflow-y: auto;
-      }
-
-      .nigechizu-panel {
-        top: 110px;
-        bottom: auto;
-        left: 10px;
-        width: 200px;
-        max-height: calc(100vh - 340px);
-        overflow-y: auto;
-      }
-
-      .help-page {
-        padding: 20px;
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
-        font-size: 14px;
-        word-wrap: break-word;
-        overflow-y: auto;
-      }
-
-      .cesium-viewer-bottom {
-        bottom: 100px !important;  /* スマホ：モバイルナビ(60px) + フッター(余白) */
-      }
-
-      #site-footer { font-size: 9px; padding: 3px 6px; }
+    /* タブメニュー：横スクロール化 */
+    .tab-menu {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      padding-bottom: 5px;
+      -webkit-overflow-scrolling: touch;
     }
-  </style>
+    .tab-button {
+      padding: 8px 14px;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    /* 初期設定画面：緯度経度を縦並び */
+    .lat-lng-container {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* 津波・逃げ地図パネル：モバイル位置 */
+    .tsunami-slider-panel {
+      top: 110px;
+      left: 10px;
+      width: 200px;
+      max-height: calc(100vh - 320px);
+      overflow-y: auto;
+    }
+    .nigechizu-panel {
+      top: 110px;
+      bottom: auto;
+      left: 10px;
+      width: 200px;
+      max-height: calc(100vh - 320px);
+      overflow-y: auto;
+    }
+
+    /* 折りたたみ時のサイズをコンパクトに */
+    .tsunami-slider-panel.collapsed,
+    .nigechizu-panel.collapsed {
+      min-width: 160px;
+      padding: 6px 10px;
+    }
+
+    /* マップコントロールを下部ツールバー化 */
+    .map-controls.mobile-toolbar {
+      position: fixed !important;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      top: auto !important;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.88);
+      padding: 6px 4px;
+      z-index: 999;
+      gap: 4px;
+      border-top: 1px solid #555;
+    }
+    .map-controls.mobile-toolbar .control-btn {
+      flex: 1;
+      margin: 0;
+      padding: 8px 2px;
+      font-size: 10px;
+      min-height: 44px;
+      line-height: 1.2;
+      white-space: normal;
+      word-break: keep-all;
+    }
+
+    /* mobile-toolbar クラスがない場合の旧位置（後方互換） */
+    .map-controls:not(.mobile-toolbar) {
+      bottom: 140px;
+      left: 10px;
+    }
+    #capture-btn {
+      bottom: 140px;
+      right: 10px;
+    }
+
+    /* ヘルプページ */
+    .help-page {
+      padding: 20px;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      font-size: 14px;
+      word-wrap: break-word;
+      overflow-y: auto;
+    }
+
+    /* Cesium クレジット位置調整 */
+    .cesium-viewer-bottom {
+      bottom: 100px !important;
+    }
+
+    /* フッター縮小 */
+    #site-footer {
+      font-size: 9px;
+      padding: 3px 6px;
+    }
+  }
+
+  /* =====================================================
+     【13】超小型画面対応 (480px以下) ：ボタンを短縮ラベルに切替
+     ===================================================== */
+  @media (max-width: 480px) {
+    .map-controls.mobile-toolbar .control-btn .full-label {
+      display: none;
+    }
+    .map-controls.mobile-toolbar .control-btn .short-label {
+      display: inline;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -256,35 +796,52 @@
         ⚠ この機能は Cesium ion アクセストークンが必要です。初期設定でご自身のトークンを入力してください。
       </div>
 
-      <div id="tsunami-ui" class="tsunami-slider-panel">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #555;">津波浸水シミュレーター</div>
+     <div id="tsunami-ui" class="tsunami-slider-panel">
+      <button class="panel-toggle" onclick="togglePanel('tsunami-ui')" type="button">
+        <span>🌊 津波浸水シミュレーター</span>
+        <span class="toggle-arrow">▼</span>
+      </button>
+      <div class="panel-content">
         <div class="height-display"><span id="height-val">10.0</span>m</div>
-        <input type="range" id="tsunami-range" min="0" max="30" step="0.5" value="10.0" oninput="updateTsunamiHeight(this.value)">
-        <p style="font-size: 11px; color: #cce5ff; margin-top: 8px; line-height: 1.3;">想定を超える「もしも」を視覚化して、避難の高さを考えよう。</p>
+        <input type="range" id="tsunami-range" min="0" max="30" step="0.5" value="10.0"
+              oninput="updateTsunamiHeight(this.value)">
+        <p style="font-size: 11px; color: #cce5ff; margin-top: 8px; line-height: 1.3;">
+          想定を超える「もしも」を視覚化して、避難の高さを考えよう。
+        </p>
+        <button class="warning-btn" onclick="showTsunamiWarning()" type="button">
+          ⚠ 重要な注意を表示（水の表示は一部のみ）
+        </button>
+      </div>
+    </div>
 
-        <!-- 重要な注意喚起 -->
-        <div style="margin-top: 10px; padding: 8px 10px; background: #5a1f1f; border-left: 4px solid #ff5252; border-radius: 4px; font-size: 11px; line-height: 1.5; color: #ffcdd2;">
-          <strong style="color: #ff8a80;">⚠ 重要な注意</strong><br>
-          ・表示は<strong>学習用の限定範囲</strong>のみです<br>
-          ・実際の津波はこの範囲を<strong>大きく超えて</strong>広がります<br>
-          ・<strong>「水が見えない＝安全」ではありません</strong><br>
-          ・必ず<a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer" style="color:#ffd54f; text-decoration:underline;">ハザードマップ</a>で本来の浸水想定を確認してください
+      <div id="nigechizu-ui" class="nigechizu-panel">
+        <button class="panel-toggle" onclick="togglePanel('nigechizu-ui')" type="button">
+          <span>🗺️ 逃げ地図モード</span>
+          <span class="toggle-arrow">▼</span>
+        </button>
+        <div class="panel-content">
+          <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #555;">逃げ地図メーカー</div>
+          <p style="font-size: 11px; margin-bottom: 10px;">地図をクリックすると、そこから歩いて行ける距離を表示します。（分速42m想定）</p>
+          <div class="legend-item"><span class="color-box" style="background: rgba(0,255,0,0.5); border:1px solid #0f0;"></span> 3分 (約125m)</div>
+          <div class="legend-item"><span class="color-box" style="background: rgba(255,255,0,0.5); border:1px solid #ff0;"></span> 6分 (約250m)</div>
+          <div class="legend-item"><span class="color-box" style="background: rgba(255,0,0,0.5); border:1px solid #f00;"></span> 9分 (約375m)</div>
+          <button onclick="clearNigeChizu()" style="width:100%; margin-top:8px; padding:6px; cursor:pointer;">消去する</button>
         </div>
       </div>
 
-      <div id="nigechizu-ui" class="nigechizu-panel">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #555;">逃げ地図メーカー</div>
-        <p style="font-size: 11px; margin-bottom: 10px;">地図をクリックすると、そこから歩いて行ける距離を表示します。（分速42m想定）</p>
-        <div class="legend-item"><span class="color-box" style="background: rgba(0,255,0,0.5); border:1px solid #0f0;"></span> 3分 (約125m)</div>
-        <div class="legend-item"><span class="color-box" style="background: rgba(255,255,0,0.5); border:1px solid #ff0;"></span> 6分 (約250m)</div>
-        <div class="legend-item"><span class="color-box" style="background: rgba(255,0,0,0.5); border:1px solid #f00;"></span> 9分 (約375m)</div>
-        <button onclick="clearNigeChizu()" style="width:100%; margin-top:8px; padding:6px; cursor:pointer;">消去する</button>
-      </div>
-
-      <div class="map-controls" id="cesium-ui">
-        <button class="control-btn" style="background: #28a745;" onclick="resetCamera()">初期位置に戻る</button>
-        <button class="control-btn" onclick="goToGround()">住民目線 (地上2m)</button>
-        <button class="control-btn" onclick="changeHeight(500)">俯瞰目線 (地上500m)</button>
+      <div class="map-controls mobile-toolbar" id="cesium-ui">
+        <button class="control-btn" style="background: #28a745;" onclick="resetCamera()">
+          <span class="full-label">初期位置に戻る</span>
+          <span class="short-label">🏠 初期</span>
+        </button>
+        <button class="control-btn" onclick="goToGround()">
+          <span class="full-label">住民目線 (地上2m)</span>
+          <span class="short-label">👤 地上</span>
+        </button>
+        <button class="control-btn" onclick="changeHeight(500)">
+          <span class="full-label">俯瞰目線 (地上500m)</span>
+          <span class="short-label">🦅 俯瞰</span>
+        </button>
       </div>
 
       <button id="capture-btn" onclick="captureMap()">地図を保存</button>
@@ -795,6 +1352,69 @@
       if (event.origin !== window.location.origin) return;
       if (event.data && event.data.action === 'showConfig') {
         document.getElementById('config-screen').style.display = 'flex';
+      }
+    });
+
+    // ========== パネル折りたたみ機能 ==========
+    function togglePanel(id) {
+      const panel = document.getElementById(id);
+      if (!panel) return;
+      panel.classList.toggle('collapsed');
+    }
+
+    // ========== 津波注意モーダル ==========
+    function showTsunamiWarning() {
+      // 既に表示されていたら何もしない
+      if (document.getElementById('tsunami-warning-modal')) return;
+
+      const overlay = document.createElement('div');
+      overlay.id = 'tsunami-warning-modal';
+      overlay.className = 'warning-modal-overlay';
+      overlay.innerHTML = `
+        <div class="warning-modal-box">
+          <h3>⚠ 重要な注意</h3>
+          <ul>
+            <li>表示は<strong>学習用の限定範囲</strong>のみです</li>
+            <li>実際の津波はこの範囲を<strong>大きく超えて</strong>広がります</li>
+            <li><strong>「水が見えない＝安全」ではありません</strong></li>
+            <li>必ず<a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer" style="color:#1565c0;">ハザードマップ</a>で本来の浸水想定を確認してください</li>
+          </ul>
+          <button class="close-btn" onclick="closeTsunamiWarning()" type="button">確認しました</button>
+        </div>
+      `;
+      // オーバーレイの外側クリックで閉じる
+      overlay.onclick = function(e) {
+        if (e.target === overlay) closeTsunamiWarning();
+      };
+      document.body.appendChild(overlay);
+    }
+
+    function closeTsunamiWarning() {
+      const modal = document.getElementById('tsunami-warning-modal');
+      if (modal) modal.remove();
+    }
+
+    // ========== モバイル時：パネル初期状態を折りたたみに ==========
+    function setMobilePanelInitialState() {
+      if (window.innerWidth <= 768) {
+        const tsunamiUi = document.getElementById('tsunami-ui');
+        const nigechizuUi = document.getElementById('nigechizu-ui');
+        if (tsunamiUi) tsunamiUi.classList.add('collapsed');
+        if (nigechizuUi) nigechizuUi.classList.add('collapsed');
+      }
+    }
+
+    // ページ読み込み時に実行
+    window.addEventListener('DOMContentLoaded', setMobilePanelInitialState);
+
+    // 画面回転・リサイズ時にも対応（任意）
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        // PCサイズに戻ったら展開状態に
+        const tsunamiUi = document.getElementById('tsunami-ui');
+        const nigechizuUi = document.getElementById('nigechizu-ui');
+        if (tsunamiUi) tsunamiUi.classList.remove('collapsed');
+        if (nigechizuUi) nigechizuUi.classList.remove('collapsed');
       }
     });
 
