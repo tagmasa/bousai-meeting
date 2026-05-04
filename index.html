@@ -12,14 +12,14 @@
 
   <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cesium.com https://unpkg.com;
-    style-src 'self' 'unsafe-inline' https://cesium.com https://unpkg.com;
-    img-src 'self' data: blob: https: http://*.tile.openstreetmap.org;
-    connect-src 'self' https: wss:;
+    default-src 'self' https: data: blob:;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://cesium.com https://*.cesium.com https://unpkg.com;
+    style-src 'self' 'unsafe-inline' https://cesium.com https://*.cesium.com https://unpkg.com;
+    img-src 'self' data: blob: https: http:;
+    connect-src 'self' https: wss: blob: data:;
     worker-src 'self' blob:;
     child-src 'self' blob:;
-    frame-src 'self' https://www.openstreetmap.org https://maps.gsi.go.jp;
+    frame-src 'self' https:;
     font-src 'self' data: https:;
   ">
 
