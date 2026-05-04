@@ -1175,18 +1175,15 @@
 
         // 衛星写真を明示的にベースレイヤーとして指定
         viewer = new Cesium.Viewer('cesiumContainer', {
-          baseLayer: baseImageryLayer,
-          terrainProvider: terrainProvider,
+          terrain: Cesium.Terrain.fromWorldTerrain(),
+          baseLayer: Cesium.ImageryLayer.fromWorldImagery({
+            style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS
+          }),
           animation: false,
           timeline: false,
-          baseLayerPicker: false,
-          geocoder: false,
-          homeButton: false,
-          sceneModePicker: false,
-          navigationHelpButton: false,
-          fullscreenButton: false,
+          baseLayerPicker: true,
           selectionIndicator: false,  // ★選択枠を非表示
-          infoBox: false,              // ★情報ボックス（tsunami-boxの吹き出し）を非表示
+          infoBox: false,              // ★情報ボックス（tsunami-box吹き出し）を非表示
           contextOptions: { webgl: { preserveDrawingBuffer: true } }
         });
 
@@ -1234,7 +1231,11 @@
       if (realCesiumInitialized) return;
       try {
         realViewer = new Cesium.Viewer('realMap', {
-          animation: false, timeline: false, baseLayerPicker: true,
+          animation: false,
+          timeline: false,
+          baseLayerPicker: true,
+          selectionIndicator: false,  // ★選択枠を非表示
+          infoBox: false,              // ★情報ボックスを非表示
           contextOptions: { webgl: { preserveDrawingBuffer: true } }
         });
         try {
