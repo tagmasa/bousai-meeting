@@ -425,7 +425,7 @@
      ===================================================== */
   .map-controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 75px;          /* ★クレジット帯(38px)＋帯の高さ約30px＋余白 */
     left: 20px;
     z-index: 1000;
     display: flex;
@@ -433,14 +433,17 @@
     gap: 10px;
   }
 
-  .control-btn {
-    background: rgba(0,0,0,0.8);
+  #capture-btn {
+    position: absolute;
+    bottom: 75px;          /* ★map-controlsと高さを揃える */
+    right: 20px;
+    z-index: 1000;
+    background: #e83e8c;
     color: white;
-    border: 1px solid #666;
-    padding: 10px 18px;
-    border-radius: 4px;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
     cursor: pointer;
-    font-size: 13px;
     font-weight: bold;
   }
 
