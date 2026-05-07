@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>もしもの防災会議 〜みんなでそなえる〜</title>
 
   <!-- セキュリティ強化 -->
@@ -68,15 +68,19 @@
   #mobile-nav {
     display: none;
     position: fixed;
-    bottom: 0;
+    bottom: 0;       /* ★最下部に固定（フッターはこの上に重ねる） */
     left: 0;
     width: 100%;
     height: 60px;
     background: #222;
     border-top: 1px solid #444;
+    border-bottom: none;
     z-index: 9999;
     justify-content: space-around;
     align-items: center;
+    /* iPhone Safariのホームバー領域を確保 */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-sizing: content-box;
   }
 
   #mobile-nav .nav-item {
@@ -421,7 +425,7 @@
      ===================================================== */
   .map-controls {
     position: absolute;
-    bottom: 90px;
+    bottom: 160px;     /* ★Cesiumのコントロールと重ならないよう上に移動 */
     left: 20px;
     z-index: 1000;
     display: flex;
@@ -450,7 +454,7 @@
 
   #capture-btn {
     position: absolute;
-    bottom: 90px;
+    bottom: 160px;     /* ★map-controlsと高さを揃える */
     right: 20px;
     z-index: 1000;
     background: #e83e8c;
@@ -517,8 +521,9 @@
   /* =====================================================
      【10】Cesium クレジット表示の調整
      ===================================================== */
+
   .cesium-viewer-bottom {
-    bottom: 50px !important;
+    bottom: 38px !important;  /* フッター高(28px) + 余白 */
   }
 
   .cesium-credit-logoContainer,
@@ -539,16 +544,24 @@
     width: 100%;
     background: rgba(34, 34, 34, 0.95);
     color: #d0d0d0;  /* WCAG AA準拠のコントラスト */
-    font-size: 10px;
-    padding: 4px 8px;
+    font-size: 11px;
+    padding: 6px 10px;
     text-align: center;
-    z-index: 9998;
-    line-height: 1.4;
+    z-index: 10000;            /* ★モバイルナビ(9999)より上 */
+    line-height: 1.5;
     border-top: 1px solid #444;
+    min-height: 28px;
+    box-sizing: border-box;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
   }
 
   #site-footer a {
     color: #9cf;
+    text-decoration: none;
+  }
+
+  #site-footer a:hover {
+    text-decoration: underline;
   }
 
   .cesium-needed-warning {
@@ -566,10 +579,10 @@
      【12】モバイル対応 (768px以下) ※全モバイル指定をここに集約
      ===================================================== */
   @media (max-width: 768px) {
-    /* レイアウト切替 */
+    /* レイアウト切替（モバイルナビ + Safariホームバー分を引く） */
     #main-container {
       display: block;
-      height: calc(100% - 60px);
+      height: calc(100% - 60px - env(safe-area-inset-bottom, 0));
     }
     #mapWrapper {
       width: 100%;
@@ -578,12 +591,14 @@
     }
     #contentContainer {
       width: 100%;
-      height: 100%;
+      height: 100%;       /* #main-container 側で既にナビ分を引いているのでOK */
       display: none;
       border: none;
+      overflow: hidden;   /* ★iframeがはみ出さないように */
     }
     #mobile-nav {
       display: flex;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.5);  /* ★境界を明確に */
     }
 
     /* タブメニュー：横スクロール化 */
@@ -678,17 +693,19 @@
       overflow-y: auto;
     }
 
-    /* Cesium クレジット位置調整 */
+    /* Cesium クレジット位置調整（モバイルナビ60px + フッター26px + 余白） */
     .cesium-viewer-bottom {
-      bottom: 100px !important;
+      bottom: calc(95px + env(safe-area-inset-bottom, 0)) !important;
     }
 
-    /* フッター縮小 */
+    /* フッター（モバイル：モバイルナビの上に表示） */
     #site-footer {
-      font-size: 9px;
-      padding: 3px 6px;
+      font-size: 10px;
+      padding: 5px 8px;
+      min-height: 26px;
+      bottom: calc(60px + env(safe-area-inset-bottom, 0));  /* ★モバイルナビの上、Safariホームバー対応 */
     }
-  }
+
 
   /* =====================================================
      【13】超小型画面対応 (480px以下) ：ボタンを短縮ラベルに切替
