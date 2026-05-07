@@ -425,7 +425,7 @@
      ===================================================== */
   .map-controls {
     position: absolute;
-    bottom: 160px;     /* ★Cesiumのコントロールと重ならないよう上に移動 */
+    bottom: 20px;
     left: 20px;
     z-index: 1000;
     display: flex;
@@ -454,7 +454,7 @@
 
   #capture-btn {
     position: absolute;
-    bottom: 160px;     /* ★map-controlsと高さを揃える */
+    bottom: 20px;
     right: 20px;
     z-index: 1000;
     background: #e83e8c;
@@ -582,7 +582,7 @@
     /* レイアウト切替（モバイルナビ + Safariホームバー分を引く） */
     #main-container {
       display: block;
-      height: calc(100% - 60px - env(safe-area-inset-bottom, 0));
+      height: calc(100% - 60px);
     }
     #mapWrapper {
       width: 100%;
@@ -623,18 +623,18 @@
 
     /* 津波・逃げ地図パネル：モバイル位置 */
     .tsunami-slider-panel {
-      top: 110px;
+      top: 165px;          /* タブ56px + ツールバー約60px + 余白 */
       left: 10px;
       width: 200px;
-      max-height: calc(100vh - 320px);
+      max-height: calc(100vh - 380px);
       overflow-y: auto;
     }
     .nigechizu-panel {
-      top: 110px;
+      top: 165px;
       bottom: auto;
       left: 10px;
       width: 200px;
-      max-height: calc(100vh - 320px);
+      max-height: calc(100vh - 380px);
       overflow-y: auto;
     }
 
@@ -647,11 +647,11 @@
 
     /* マップコントロールを下部ツールバー化 */
     .map-controls.mobile-toolbar {
-      position: fixed !important;
-      bottom: 60px;
+      position: absolute !important;
+      top: 56px;           /* ★タブメニュー(高さ約56px)の直下 */
+      bottom: auto !important;
       left: 0;
       right: 0;
-      top: auto !important;
       display: flex;
       flex-direction: row;
       justify-content: space-around;
@@ -659,8 +659,10 @@
       padding: 6px 4px;
       z-index: 999;
       gap: 4px;
-      border-top: 1px solid #555;
+      border-top: none;
+      border-bottom: 1px solid #555;
     }
+
     .map-controls.mobile-toolbar .control-btn {
       flex: 1;
       margin: 0;
@@ -678,8 +680,10 @@
       left: 10px;
     }
     #capture-btn {
-      bottom: 140px;
+      position: absolute !important;
+      top: 110px;            /* ツールバーと同高さ、または右上 */
       right: 10px;
+      bottom: auto !important;
     }
 
     /* ヘルプページ */
@@ -695,7 +699,7 @@
 
     /* Cesium クレジット位置調整（モバイルナビ60px + フッター26px + 余白） */
     .cesium-viewer-bottom {
-      bottom: calc(95px + env(safe-area-inset-bottom, 0)) !important;
+      bottom: calc(90px + env(safe-area-inset-bottom, 0)) !important;
     }
 
     /* フッター（モバイル：モバイルナビの上に表示） */
@@ -705,7 +709,7 @@
       min-height: 26px;
       bottom: calc(60px + env(safe-area-inset-bottom, 0));  /* ★モバイルナビの上、Safariホームバー対応 */
     }
-
+  } 
 
   /* =====================================================
      【13】超小型画面対応 (480px以下) ：ボタンを短縮ラベルに切替
