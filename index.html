@@ -517,10 +517,9 @@
   /* =====================================================
      【10】Cesium クレジット表示の調整
      ===================================================== */
-    /* Cesium クレジット位置調整（モバイルナビ60px + フッター26px + 余白） */
-    .cesium-viewer-bottom {
-      bottom: 95px !important;
-    }
+  .cesium-viewer-bottom {
+    bottom: 50px !important;
+  }
 
   .cesium-credit-logoContainer,
   .cesium-credit-textContainer,
@@ -540,24 +539,16 @@
     width: 100%;
     background: rgba(34, 34, 34, 0.95);
     color: #d0d0d0;  /* WCAG AA準拠のコントラスト */
-    font-size: 11px;
-    padding: 6px 10px;
+    font-size: 10px;
+    padding: 4px 8px;
     text-align: center;
-    z-index: 10000;        /* ★Cesium要素より確実に上に */
-    line-height: 1.5;
+    z-index: 9998;
+    line-height: 1.4;
     border-top: 1px solid #444;
-    min-height: 28px;      /* ★最低の高さを確保 */
-    box-sizing: border-box;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);  /* ★視認性アップ */
   }
 
   #site-footer a {
     color: #9cf;
-    text-decoration: none;
-  }
-
-  #site-footer a:hover {
-    text-decoration: underline;
   }
 
   .cesium-needed-warning {
@@ -687,19 +678,16 @@
       overflow-y: auto;
     }
 
-    /* Cesium クレジット表示の調整 */
+    /* Cesium クレジット位置調整 */
     .cesium-viewer-bottom {
-      bottom: 38px !important;  /* フッター高(28px) + 余白 */
+      bottom: 100px !important;
     }
 
-    /* フッター（モバイル：高さは確保しつつフォントだけ縮小） */
+    /* フッター縮小 */
     #site-footer {
-      font-size: 10px;
-      padding: 5px 8px;
-      min-height: 26px;
-      bottom: 60px;          /* ★モバイルナビ(60px)の上に表示 */
+      font-size: 9px;
+      padding: 3px 6px;
     }
-
   }
 
   /* =====================================================
